@@ -187,12 +187,11 @@ canvas {
     padding: 10px 20px;
     font-size: 20px;
     cursor: pointer;
-    display: flex;
-    position: absolute;
-    bottom: 40px;
     background-color: #ff9600;
     border-radius: 15px;
+    position: relative; /* oder einfach weglassen */
 }
+
 
 .menu {
     display: flex;
@@ -410,4 +409,12 @@ canvas {
     hyphens: auto;
     text-align: justify;
     text-decoration: none;
+}
+
+.endscreen-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 20px;
+   
 }

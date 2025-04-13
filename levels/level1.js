@@ -24,13 +24,10 @@ function initLevel() {
         ],
         // Clouds array
         [
-            new Cloud(),
-            new Cloud(),
-            new Cloud(),
-            new Cloud(),
-            new Cloud(),
-            new Cloud(),
-            new Cloud(),
+            new Cloud(200),
+            new Cloud(800),
+            new Cloud(1400),
+            new Cloud(2000)
         ],
         // Background objects array
         [

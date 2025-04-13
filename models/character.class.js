@@ -91,9 +91,9 @@ class Character extends MoveableObject {
         this.applyGravity();
         this.jumping = false;
         this.offset = {
-            top: 80,
+            top: 60,
             right: 20,
-            bottom: 20,
+            bottom: 30,
             left: 20
         };
     }

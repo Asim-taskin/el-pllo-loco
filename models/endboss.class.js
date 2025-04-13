@@ -173,7 +173,7 @@ class Endboss extends MoveableObject {
      * Reduce the endboss's energy by 10 and ensure it doesn't go below 0.
      */
     reduceEnergy() {
-        this.energy -= 10;
+        this.energy -= 30;
         if (this.energy < 0) {
             this.energy = 0;
         }

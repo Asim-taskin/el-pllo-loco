@@ -20,13 +20,21 @@ let gameLost = new Audio('audio/game_lost.mp3');
  * Indicates whether the game audio is muted.
  * @type {boolean}
  */
-let isGameMuted = false;
-
 /**
  * Indicates whether the background music is muted.
  * @type {boolean}
  */
 let backgroundMusicMuted = false;
+
+/**
+ * Indicates whether the game audio is muted.
+ * @type {boolean}
+ */
+let isGameMuted = false;
+
+// Jetzt ist beides deklariert → danach dürfen wir darauf zugreifen:
+isGameMuted = localStorage.getItem('isGameMuted') === 'true';
+backgroundMusicMuted = localStorage.getItem('backgroundMusicMuted') === 'true';
 
 /**
  * Plays the game won sound if the game is not muted.
@@ -69,6 +77,10 @@ function stopBackgroundMusic() {
 function updateSoundStatus() {
     backgroundMusicMuted = !backgroundMusicMuted;
     backgroundMusic.muted = backgroundMusicMuted;
+
+    // speichere den Zustand
+    localStorage.setItem('backgroundMusicMuted', backgroundMusicMuted);
+
     let musicToggleButton = document.getElementById('music-toggle-button');
     let soundIcon = document.getElementById('sound-icon');
     if (backgroundMusicMuted) {
@@ -78,19 +90,23 @@ function updateSoundStatus() {
         musicToggleButton.innerText = 'Sound On';
         soundIcon.src = './img/12_icons/SOUND_ON_icon.png';
     }
+
     if (gameActive) {
         muteSounds();
     }
 }
+
 
 /**
  * Toggles the mute status of the game audio and updates the UI.
  */
 function toggleSoundAndImage() {
     isGameMuted = !isGameMuted;
+    localStorage.setItem('isGameMuted', isGameMuted); // speichern
     updateSoundStatus();
     muteSounds();
 }
+
 
 /**
  * Mutes or unmutes all game audio elements based on the game mute status.
