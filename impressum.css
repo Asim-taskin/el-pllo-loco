@@ -1,0 +1,28 @@
+main {
+    padding: 80px;
+}
+
+body {
+    overflow: auto;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+
+    background-image: url('./img/desert4.png');
+}
+
+
+
+h2, h3, .imprint-wrapper {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+   
+}
+
+/* h1 {
+    font-family: 'zabars', Arial, Helvetica, sans-serif;
+} */
+
+.back-arrow{
+    width:30px;
+    height:auto;
+}
