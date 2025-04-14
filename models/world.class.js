@@ -38,14 +38,20 @@ class World {
     }
 
     run() {
-        setInterval(() => {
+        const loop = () => {
+            if (!this.character || this.gameOver) return;
+    
             this.checkCoinCollisions();
             this.checkBottleCollisions();
             this.checkThrowObjects();
             this.checkCollisions();
             this.checkBottleHitEndbossCollisions();
-        }, 10);
+    
+            requestAnimationFrame(loop); // statt setInterval
+        };
+        loop(); // starte den Loop
     }
+    
 
     checkCollisions() {
         this.checkCollisionsWithEnemies();
@@ -74,6 +80,15 @@ class World {
             });
         });
     }
+
+    checkBottleHitEndbossCollisions() {
+        this.throwableObjects.forEach((bottle, index) => {
+            if (this.isBottleCollidingWithEndboss(bottle)) {
+                this.handleBottleEndbossCollision(bottle, index);
+            }
+        });
+    }
+    
 
     handleBottleEnemyCollision(bottle, bottleIndex, enemy) {
         bottle.hasCollided = true;
@@ -127,26 +142,45 @@ class World {
     availableBottles = 0; // neue Zählung für Flaschen zum Werfen
 
 
-    /**
-     * ✅ Updated: precise bounding box collision
-     */
     checkBottleCollisions() {
+        // Iteriere rückwärts, damit das Entfernen (splice) den Index nicht verfälscht.
         for (let i = this.level.bottles.length - 1; i >= 0; i--) {
             let bottle = this.level.bottles[i];
-            if (this.isCharacterNearBottle(bottle)) {
-                this.level.bottles.splice(i, 1);
-                this.availableBottles++; // 💥 unbegrenzt erhöhen
-    
-                // Die Anzeige zeigt nur bis 10
-                let visibleBottles = Math.min(this.availableBottles, this.bottleBar.MAX_BOTTLES);
-                this.bottleBar.setCollectedBottles(visibleBottles);
-    
-                if (!isGameMuted) {
-                    this.playGameSound('audio/bottle_collect.mp3', 1);
+        
+            // Prüfe, ob die Flasche in Reichweite ist und noch nicht eingesammelt wurde
+            if (this.isCharacterNearBottle(bottle) && !bottle.collected) {
+                if (this.availableBottles < this.bottleBar.MAX_BOTTLES) {
+                    // Speichere Positionen vor dem Entfernen
+                    let respawnX = bottle.x;
+                    let respawnY = bottle.y;
+        
+                    // Flasche aus dem Level entfernen
+                    this.level.bottles.splice(i, 1);
+                    this.availableBottles++;
+        
+                    let visibleBottles = Math.min(this.availableBottles, this.bottleBar.MAX_BOTTLES);
+                    this.bottleBar.setCollectedBottles(visibleBottles);
+        
+                    if (!isGameMuted) {
+                        this.playGameSound('audio/bottle_collect.mp3', 1);
+                    }
+        
+                    // Respawn der Flasche: Nach 5000ms wird an derselben Stelle eine neue Flasche erzeugt
+                    // (Achte darauf, dass hier ggf. der x-Wert korrigiert wird, falls dein Konstruktor x + 450 addiert)
+                    setTimeout(() => {
+                        let newBottle = new Bottles(respawnX - 450, respawnY);
+                        this.level.bottles.push(newBottle);
+                    }, 5000);
                 }
             }
         }
     }
+    
+    
+    
+    
+    
+    
     
     
     
@@ -158,7 +192,8 @@ class World {
  * ✅ Präziserer bounding box check für bottle collection mit Puffer
  */
 isCharacterNearBottle(bottle) {
-    const buffer = 30; // je größer der Wert, desto näher muss man sein
+    const buffer = 30; // vorher war 30 – das hat die Hitbox kleiner gemacht!
+
 
     const char = this.character;
     const charLeft = char.x + char.offset.left + buffer;
@@ -180,51 +215,79 @@ isCharacterNearBottle(bottle) {
     
 
     
+checkThrowObjects() {
+    if (this.keyboard.D && this.canThrowBottle && this.availableBottles > 0 && !this.character.otherDirection) {
+        let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
+        this.throwableObjects.push(bottle);
+
+        this.availableBottles--; // Zähler verringern
+
+        let visibleBottles = Math.min(this.availableBottles, this.bottleBar.MAX_BOTTLES);
+        this.bottleBar.setCollectedBottles(visibleBottles);
+
+        // Hier sofort neuen Respawn auslösen:
+        // (angenommen, du möchtest direkt eine neue Flasche am selben Ort erzeugen)
+        setTimeout(() => {
+            // Erstelle eine neue Bottles-Instanz an der ursprünglichen Position
+            let newBottle = new Bottles(/* hier die Position übergeben */);
+            // Du müsstest hier die korrekten x, y-Werte angeben – z. B. eine Standardposition.
+            this.level.bottles.push(newBottle);
+        }, 0); // oder minimaler Delay, z.B. 0 ms
+
+        this.canThrowBottle = false;
+        setTimeout(() => {
+            this.canThrowBottle = true;
+        }, 650);
+    }
+}
+
+
+
+
+
+
+handleBottleEndbossCollision(bottle, index) {
+    bottle.hasCollided = true;
+    this.level.endboss[0].bossIsHit();
+    this.playBottleShatterSound();
+    bottle.animateBottleSplash();
     
+    setTimeout(() => {
+        this.throwableObjects.splice(index, 1); // Entfernt die geworfene Flasche aus den ThrowableObjects
 
-    checkThrowObjects() {
-        if (this.keyboard.D && this.canThrowBottle && this.availableBottles > 0 && !this.character.otherDirection) {
-            let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
-            this.throwableObjects.push(bottle);
-        
-            this.availableBottles--; // tatsächliche Anzahl verringern
-            if (this.bottleBar.collectedBottles > 0) {
-                this.bottleBar.setCollectedBottles(this.bottleBar.collectedBottles - 1);
-            }
-        
-            this.canThrowBottle = false;
-            setTimeout(() => {
-                this.canThrowBottle = true;
-            }, 650);
-        }
-        
-    }
+        // Zähler verringern – hier vermutlich auch sinnvoll, wenn eine Flasche den Endboss trifft
+        this.availableBottles = Math.max(0, this.availableBottles - 1);
+        let visibleBottles = Math.min(this.availableBottles, this.bottleBar.MAX_BOTTLES);
+        this.bottleBar.setCollectedBottles(visibleBottles);
+    }, 1000);
+}
 
-    checkBottleHitEndbossCollisions() {
-        this.throwableObjects.forEach((bottle, index) => {
-            if (this.isBottleCollidingWithEndboss(bottle)) {
-                this.handleBottleEndbossCollision(bottle, index);
-            }
-        });
-    }
+
+
+
 
     isBottleCollidingWithEndboss(bottle) {
         return !bottle.hasCollided && this.level.endboss[0].isColliding(bottle);
     }
 
-    handleBottleEndbossCollision(bottle, index) {
-        bottle.hasCollided = true;
-        this.level.endboss[0].bossIsHit();
-        this.playBottleShatterSound();
-        bottle.animateBottleSplash();
+
+
+    removeBottleAndEnemyAfterCollision(bottleIndex, enemy) {
+        if (enemy.energy === 0) {
+            setTimeout(() => {
+                this.removeEnemyFromLevel(enemy);
+            }, 500);
+        }
+    
         setTimeout(() => {
-            this.removeBottleAfterCollision(index);
+            this.throwableObjects.splice(bottleIndex, 1);
+            this.availableBottles = Math.max(0, this.availableBottles - 1); // ❗ Hier ebenfalls reduzieren!
+            let visibleBottles = Math.min(this.availableBottles, this.bottleBar.MAX_BOTTLES);
+            this.bottleBar.setCollectedBottles(visibleBottles);
         }, 1000);
     }
-
-    removeBottleAfterCollision(index) {
-        this.throwableObjects.splice(index, 1);
-    }
+    
+    
 
     handleCollision() {
         this.character.hit();

@@ -116,13 +116,14 @@
                 </div>
             </div>
         </div>
-        <div id="endScreen" class="end-screen" style="display:none">
-
+        <div id="endScreen" class="end-screen">
+            <div class="end-text"></div> <!-- Hintergrund übernimmt das Bild -->
             <div class="endscreen-buttons">
-                <div><button class="button-99" onclick="returnToMenu()">Back to Menu</button></div>
-                <div><button class="button-99" onclick="init()">Restart</button></div>
+              <button class="button-99" onclick="returnToMenu()">Back to Menu</button>
+              <button class="button-99" onclick="init()">Restart</button>
             </div>
-        </div>
+          </div>
+          
         <div id="content" class="content" style="display:none">
             <canvas width="720" height="480" id="canvas"></canvas>
         </div>

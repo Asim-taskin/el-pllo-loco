@@ -97,17 +97,16 @@ function showEndScreen() {
     stopAllIntervals();
 }
 
-/**
- * Show the game won screen.
- * @param {HTMLElement} endScreen - The end screen element.
- * @param {HTMLElement} mobileButtonContainer - The mobile button container element.
- */
 function showGameWonScreen(endScreen, mobileButtonContainer) {
     gameWonSound();
-    endScreen.style.backgroundImage = "url('img/You won, you lost/You Won B.png')";
+    endScreen.classList.remove('game-lost-screen');
+    endScreen.classList.add('game-won-screen');
     mobileButtonContainer.style.display = 'none';
+    endScreen.style.display = 'flex';
 
-    // Zeige Buttons wieder an
+    const endText = endScreen.querySelector('.end-text');
+    // endText.style.backgroundImage = "url('img/You won, you lost/You Won B.png')";
+
     const buttons = endScreen.querySelectorAll('button');
     buttons.forEach(button => {
         button.style.display = 'inline-block';
@@ -115,16 +114,19 @@ function showGameWonScreen(endScreen, mobileButtonContainer) {
 }
 
 
-/**
- * Show the game lost screen.
- * @param {HTMLElement} endScreen - The end screen element.
- * @param {HTMLElement} mobileButtonContainer - The mobile button container element.
- */
+
+
 function showGameLostScreen(endScreen, mobileButtonContainer) {
     gameLostSound();
-    endScreen.style.backgroundImage = "url('img/9_intro_outro_screens/start/game_over/you lost.png')";
+    endScreen.classList.remove('game-won-screen');
+    endScreen.classList.add('game-lost-screen');
+
     mobileButtonContainer.style.display = 'none';
+    endScreen.style.display = 'flex';
 }
+
+
+
 
 /**
  * Open the controls screen.
