@@ -11,7 +11,7 @@ class World {
     endbossHealthbar = new EndbossHealthbar();
     statusBar = new Statusbar();
     throwableObjects = [];
-    level = level1; // Beachte: level1 sollte den Ausgangszustand des Levels repräsentieren.
+    level = level1; 
     canvas;
     ctx;
     keyboard;
@@ -22,21 +22,20 @@ class World {
     gameOver = false;
     canThrowBottle = true;
 
-    // Zähler für aktuell eingesammelte Flaschen
+  
     availableBottles = 0;
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
         this.keyboard = keyboard;
-        console.log('Character in constructor:', this.character);
+        // console.log('Character in constructor:', this.character);
 
         this.draw();
         this.setWorld();
         this.run();
     }
 
-    // Setzt die Referenz des Charakters auf die World
     setWorld() {
         this.character.world = this;
     }
@@ -51,14 +50,29 @@ class World {
             this.checkCollisions();
             this.checkBottleHitEndbossCollisions();
     
-            requestAnimationFrame(loop); // statt setInterval
+            requestAnimationFrame(loop); 
         };
-        loop(); // starte den Loop
+        loop(); 
     }
     
     checkCollisions() {
         this.checkCollisionsWithEnemies();
         this.checkCollisionWithEndboss();
+    }
+
+    resetWorld() {
+        this.availableBottles = 17;
+        this.throwableObjects = [];
+        this.gameOver = false;
+        this.camera_x = 0;
+        this.collectedCoins = 0;
+        this.showEndbossHealthbar = false;
+        // Hole dir einen neuen, unveränderten Level-Zustand:
+        this.level = getInitialLevelState(); 
+        // Charakter neu initialisieren (falls nötig)
+        this.character = new Character();
+        this.character.world = this;
+        // Weitere Statusvariablen zurücksetzen ...
     }
 
     checkCollisionsWithEnemies() {
@@ -115,7 +129,6 @@ class World {
         }
         setTimeout(() => {
             this.removeBottleAfterCollision(bottleIndex);
-            // Kein weiterer availableBottles-Decrement hier!
         }, 1000);
     }
 
@@ -147,7 +160,6 @@ class World {
             let bottle = this.level.bottles[i];
             if (this.isCharacterNearBottle(bottle)) {
                 if (this.availableBottles < this.bottleBar.MAX_BOTTLES) {
-                    // Entferne die Flasche aus dem Level – sie kann nur einmal eingesammelt werden.
                     this.level.bottles.splice(i, 1);
                     this.availableBottles++;
                     let visibleBottles = Math.min(this.availableBottles, this.bottleBar.MAX_BOTTLES);
@@ -164,7 +176,7 @@ class World {
      * ✅ Präziserer bounding box check für bottle collection mit Puffer
      */
     isCharacterNearBottle(bottle) {
-        const buffer = 30; // vorher war 30 – das hat die Hitbox kleiner gemacht!
+        const buffer = 30; 
 
         const char = this.character;
         const charLeft = char.x + char.offset.left + buffer;
@@ -187,13 +199,11 @@ class World {
         if (this.keyboard.D && this.canThrowBottle && this.availableBottles > 0 && !this.character.otherDirection) {
             let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
             this.throwableObjects.push(bottle);
-            
-            // Verringere den Inventarzähler, da eine Flasche geworfen wurde.
             this.availableBottles--;
             let visibleBottles = Math.min(this.availableBottles, this.bottleBar.MAX_BOTTLES);
             this.bottleBar.setCollectedBottles(visibleBottles);
             
-            // Steuerung, dass nicht mehrfach in schneller Folge geworfen wird:
+            
             this.canThrowBottle = false;
             setTimeout(() => {
                 this.canThrowBottle = true;
@@ -208,8 +218,7 @@ class World {
         bottle.animateBottleSplash();
         
         setTimeout(() => {
-            this.throwableObjects.splice(index, 1); // Entfernt die geworfene Flasche aus den ThrowableObjects
-            // Kein weiterer availableBottles-Decrement hier!
+            this.throwableObjects.splice(index, 1); 
             let visibleBottles = Math.min(this.availableBottles, this.bottleBar.MAX_BOTTLES);
             this.bottleBar.setCollectedBottles(visibleBottles);
         }, 1000);
@@ -220,7 +229,6 @@ class World {
     }
 
     removeBottleAfterCollision(bottleIndex) {
-        // Entferne die Flasche aus throwableObjects, wenn sie kollidiert hat.
         this.throwableObjects.splice(bottleIndex, 1);
     }
 
@@ -268,13 +276,13 @@ class World {
         if (!gameActive) return;
         this.clearCanvas();
         
-        // Hintergrund + Wolken
-        this.drawBackground(); // Hintergrundobjekte (z. B. Berge, Wiese)
-        this.drawClouds();     // ☁️ Wolken direkt nach dem Hintergrund
+        
+        this.drawBackground(); 
+        this.drawClouds();     
     
-        this.drawMainCharacter(); // Charakter
-        this.drawUI();            // ✅ Statusbars immer im Vordergrund
-        this.drawGameObjects();   // Gegner, Coins etc.
+        this.drawMainCharacter(); 
+        this.drawUI();            
+        this.drawGameObjects();   
     
         requestAnimationFrameId = requestAnimationFrame(() => this.draw());
     }
@@ -297,18 +305,7 @@ class World {
 
     drawMainCharacter() {
         this.ctx.translate(this.camera_x, 0);
-        this.addToMap(this.character);
-    
-        // Debug: Hitbox anzeigen (optional)
-        // const o = this.character.offset;
-        // this.ctx.strokeStyle = 'red';
-        // this.ctx.strokeRect(
-        //     this.character.x + o.left,
-        //     this.character.y + o.top,
-        //     this.character.width - o.left - o.right,
-        //     this.character.height - o.top - o.bottom
-        // );
-    
+        this.addToMap(this.character);    
         this.ctx.translate(-this.camera_x, 0);
     }
 
@@ -317,7 +314,6 @@ class World {
         this.addToMap(this.bottleBar);
         this.addToMap(this.coinBar);
         this.updateEndbossHealthbarVisibility();
-    
         if (this.showEndbossHealthbar) {
             this.addToMap(this.endbossHealthbar);
         }
@@ -338,7 +334,6 @@ class World {
         this.addObjectsToMap(this.level.coins);
         this.addObjectsToMap(this.level.endboss);
         this.addObjectsToMap(this.level.bottles);
-        // this.addObjectsToMap(this.level.clouds);
         this.addObjectsToMap(this.throwableObjects);
         this.ctx.translate(-this.camera_x, 0);
     }
@@ -383,11 +378,7 @@ class World {
         }
     }
 
-    /**
-     * Setzt die Welt zurück (wird beim Restart aufgerufen).
-     * Hier werden relevante Variablen wie availableBottles und ggf.
-     * Arrays (wie level.bottles) neu initialisiert.
-     */
+
     resetWorld() {
         this.availableBottles = 0;
         this.throwableObjects = [];
@@ -395,15 +386,12 @@ class World {
         this.camera_x = 0;
         this.collectedCoins = 0;
         this.showEndbossHealthbar = false;
-        // Falls level1 beim Restart neu geladen werden soll, kannst du hier eine Kopie neu zuweisen.
-        // Beispiel:
-        // this.level = getInitialLevelState(); 
-        // ...oder wenn level1 bereits ein Ausgangszustand ist:
+
         this.level = level1;
-        // Den Character neu initialisieren (falls nötig)
+        
         this.character = new Character();
         this.character.world = this;
         
-        // Setze ggf. weitere Statusvariablen zurück.
+
     }
 }

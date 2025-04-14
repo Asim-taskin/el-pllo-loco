@@ -60,8 +60,15 @@ function gameLostSound() {
 function playBackgroundMusic() {
     backgroundMusic.volume = 0.1;
     backgroundMusic.muted = backgroundMusicMuted;
-    backgroundMusic.play();
+    backgroundMusic.play().catch((error) => {
+        if (error.name === 'AbortError') {
+            console.log('play() aborted, z. B. durch schnelles Pause()');
+        } else {
+            console.error(error);
+        }
+    });
 }
+
 
 /**
  * Stops the background music and resets its playback position to the beginning.
