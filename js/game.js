@@ -104,9 +104,16 @@ function showEndScreen() {
  */
 function showGameWonScreen(endScreen, mobileButtonContainer) {
     gameWonSound();
-    endScreen.style.backgroundImage = "url('img/9_intro_outro_screens/start/game_over/game over.png')";
+    endScreen.style.backgroundImage = "url('img/You won, you lost/You Won B.png')";
     mobileButtonContainer.style.display = 'none';
+
+    // Zeige Buttons wieder an
+    const buttons = endScreen.querySelectorAll('button');
+    buttons.forEach(button => {
+        button.style.display = 'inline-block';
+    });
 }
+
 
 /**
  * Show the game lost screen.
