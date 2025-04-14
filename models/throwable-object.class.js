@@ -51,8 +51,8 @@ class ThrowableObject extends MoveableObject {
      * Throws the object with a specific trajectory and initiates animation.
      */
     throw() {
-        this.speedY = 30;
-        this.speedX = 30;
+        this.speedY = 15;
+        this.speedX = 15;
         this.applyGravity();
         this.throwInterval = setInterval(() => {
             this.x += 25;

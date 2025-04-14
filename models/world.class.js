@@ -124,56 +124,80 @@ class World {
         });
     }
 
+    availableBottles = 0; // neue Zählung für Flaschen zum Werfen
+
+
     /**
      * ✅ Updated: precise bounding box collision
      */
     checkBottleCollisions() {
-        this.level.bottles.forEach((bottle, index) => {
+        for (let i = this.level.bottles.length - 1; i >= 0; i--) {
+            let bottle = this.level.bottles[i];
             if (this.isCharacterNearBottle(bottle)) {
-                this.level.bottles.splice(index, 1);
-                this.bottleBar.setCollectedBottles(this.bottleBar.collectedBottles + 1);
+                this.level.bottles.splice(i, 1);
+                this.availableBottles++; // 💥 unbegrenzt erhöhen
+    
+                // Die Anzeige zeigt nur bis 10
+                let visibleBottles = Math.min(this.availableBottles, this.bottleBar.MAX_BOTTLES);
+                this.bottleBar.setCollectedBottles(visibleBottles);
+    
                 if (!isGameMuted) {
                     this.playGameSound('audio/bottle_collect.mp3', 1);
                 }
             }
-        });
+        }
     }
+    
+    
+    
+    
+    
 
-    /**
-     * ✅ Updated: bounding box check for bottle collection
-     */
-    isCharacterNearBottle(bottle) {
-        const char = this.character;
-        const charLeft = char.x + char.offset.left;
-        const charRight = char.x + char.width - char.offset.right;
-        const charTop = char.y + char.offset.top;
-        const charBottom = char.y + char.height - char.offset.bottom;
-    
-        const bottleLeft = bottle.x;
-        const bottleRight = bottle.x + (bottle.width || 40);
-        const bottleTop = bottle.y;
-        const bottleBottom = bottle.y + (bottle.height || 40);
-    
-        const horizontallyOverlapping = charRight > bottleLeft && charLeft < bottleRight;
-        const verticallyOverlapping = charBottom > bottleTop && charTop < bottleBottom;
-    
-        return horizontallyOverlapping && verticallyOverlapping;
-    }
+
+/**
+ * ✅ Präziserer bounding box check für bottle collection mit Puffer
+ */
+isCharacterNearBottle(bottle) {
+    const buffer = 30; // je größer der Wert, desto näher muss man sein
+
+    const char = this.character;
+    const charLeft = char.x + char.offset.left + buffer;
+    const charRight = char.x + char.width - char.offset.right - buffer;
+    const charTop = char.y + char.offset.top + buffer;
+    const charBottom = char.y + char.height - char.offset.bottom - buffer;
+
+    const bottleLeft = bottle.x;
+    const bottleRight = bottle.x + (bottle.width || 40);
+    const bottleTop = bottle.y;
+    const bottleBottom = bottle.y + (bottle.height || 40);
+
+    const horizontallyOverlapping = charRight > bottleLeft && charLeft < bottleRight;
+    const verticallyOverlapping = charBottom > bottleTop && charTop < bottleBottom;
+
+    return horizontallyOverlapping && verticallyOverlapping;
+}
+
     
 
     
     
 
     checkThrowObjects() {
-        if (this.keyboard.D && this.canThrowBottle && this.bottleBar.collectedBottles > 0 && !this.character.otherDirection) {
+        if (this.keyboard.D && this.canThrowBottle && this.availableBottles > 0 && !this.character.otherDirection) {
             let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
             this.throwableObjects.push(bottle);
-            this.bottleBar.setCollectedBottles(this.bottleBar.collectedBottles - 1);
+        
+            this.availableBottles--; // tatsächliche Anzahl verringern
+            if (this.bottleBar.collectedBottles > 0) {
+                this.bottleBar.setCollectedBottles(this.bottleBar.collectedBottles - 1);
+            }
+        
             this.canThrowBottle = false;
             setTimeout(() => {
                 this.canThrowBottle = true;
             }, 650);
         }
+        
     }
 
     checkBottleHitEndbossCollisions() {
@@ -297,10 +321,17 @@ class World {
         this.addToMap(this.bottleBar);
         this.addToMap(this.coinBar);
         this.updateEndbossHealthbarVisibility();
+    
         if (this.showEndbossHealthbar) {
             this.addToMap(this.endbossHealthbar);
         }
+    
+        this.ctx.font = '20px Arial';
+        this.ctx.fillStyle = 'white';
+
     }
+    
+    
 
     updateEndbossHealthbarVisibility() {
         if (this.character.x > 4500) {

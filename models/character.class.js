@@ -242,4 +242,17 @@ class Character extends MoveableObject {
     handleIdleState() {
         this.playAnimation(this.IMAGES_IDLE);
     }
+
+    isDead() {
+        return this.energy <= 0;
+    }
+    
+    isDead() {
+        return this.energy <= 0;
+    }
+    
+
 }
+
+
+

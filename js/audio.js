@@ -177,3 +177,31 @@ function muteCharacterSounds() {
         world.character.hurt_sound.muted = isGameMuted;
     }
 }
+
+
+/**
+ * Initialisiert den Sound-Status beim Seitenladen anhand von localStorage.
+ */
+function initSoundStatusUI() {
+    let musicToggleButton = document.getElementById('music-toggle-button');
+    let soundIcon = document.getElementById('sound-icon');
+
+    // Falls das HTML-Element noch nicht existiert, abbrechen
+    if (!musicToggleButton || !soundIcon) return;
+
+    if (backgroundMusicMuted || isGameMuted) {
+        musicToggleButton.innerText = 'Sound Off';
+        soundIcon.src = './img/12_icons/SOUND_OFF_icon.png';
+    } else {
+        musicToggleButton.innerText = 'Sound On';
+        soundIcon.src = './img/12_icons/SOUND_ON_icon.png';
+    }
+
+    backgroundMusic.muted = backgroundMusicMuted;
+    muteSounds(); // alle Sounds muten oder entmuten
+}
+
+
+window.addEventListener('load', () => {
+    initSoundStatusUI();
+});

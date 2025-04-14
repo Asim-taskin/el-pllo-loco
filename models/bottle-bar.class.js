@@ -1,9 +1,3 @@
-/**
- * Represents a status bar for collected bottles in the game.
- * @extends DrawableObject
- */
-
-MAX_BOTTLES = 17;
 class BottleBar extends DrawableObject {
 
     IMAGES_BOTTLES = [
@@ -15,10 +9,10 @@ class BottleBar extends DrawableObject {
         'img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/100.png'
     ];
 
-    collectedBottles = 0;
-
     constructor() {
         super();
+        this.MAX_BOTTLES = 10; // ✅ jetzt als Instanz-Eigenschaft!
+        this.collectedBottles = 0;
         this.loadImages(this.IMAGES_BOTTLES);
         this.x = 15;
         this.y = 100;
@@ -27,15 +21,20 @@ class BottleBar extends DrawableObject {
         this.setCollectedBottles(0);
     }
 
-    
     /**
      * Set the number of collected bottles and update the bottle bar's image.
      * @param {number} count - The number of collected bottles.
      */
     setCollectedBottles(count) {
         this.collectedBottles = count;
-        let percentage = (this.collectedBottles / MAX_BOTTLES) * 100;
+        let percentage = (this.collectedBottles / this.MAX_BOTTLES) * 100;
+        if (percentage > 100) percentage = 100;
         let path = this.IMAGES_BOTTLES[this.resolveImagesIndex(percentage)];
         this.img = this.imageCache[path];
     }
+
+
+    
+    
 }
+
