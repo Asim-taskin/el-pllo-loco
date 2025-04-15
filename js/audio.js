@@ -17,10 +17,6 @@ let gameWon = new Audio('audio/game_won.mp3');
 let gameLost = new Audio('audio/game_lost.mp3');
 
 /**
- * Indicates whether the game audio is muted.
- * @type {boolean}
- */
-/**
  * Indicates whether the background music is muted.
  * @type {boolean}
  */
@@ -32,7 +28,7 @@ let backgroundMusicMuted = false;
  */
 let isGameMuted = false;
 
-// Jetzt ist beides deklariert → danach dürfen wir darauf zugreifen:
+// Zustand aus localStorage laden:
 isGameMuted = localStorage.getItem('isGameMuted') === 'true';
 backgroundMusicMuted = localStorage.getItem('backgroundMusicMuted') === 'true';
 
@@ -41,7 +37,13 @@ backgroundMusicMuted = localStorage.getItem('backgroundMusicMuted') === 'true';
  */
 function gameWonSound() {
     if (!isGameMuted) {
-        gameWon.play();
+        gameWon.play().catch((error) => {
+            if (error.name === 'AbortError') {
+                console.log('gameWon.play() aborted, z. B. durch schnelles Pause()');
+            } else {
+                console.error(error);
+            }
+        });
     }
 }
 
@@ -50,7 +52,13 @@ function gameWonSound() {
  */
 function gameLostSound() {
     if (!isGameMuted) {
-        gameLost.play();
+        gameLost.play().catch((error) => {
+            if (error.name === 'AbortError') {
+                console.log('gameLost.play() aborted, z. B. durch schnelles Pause()');
+            } else {
+                console.error(error);
+            }
+        });
     }
 }
 
@@ -62,13 +70,12 @@ function playBackgroundMusic() {
     backgroundMusic.muted = backgroundMusicMuted;
     backgroundMusic.play().catch((error) => {
         if (error.name === 'AbortError') {
-            console.log('play() aborted, z. B. durch schnelles Pause()');
+            console.log('backgroundMusic.play() aborted, z. B. durch schnelles Pause()');
         } else {
             console.error(error);
         }
     });
 }
-
 
 /**
  * Stops the background music and resets its playback position to the beginning.
@@ -85,7 +92,7 @@ function updateSoundStatus() {
     backgroundMusicMuted = !backgroundMusicMuted;
     backgroundMusic.muted = backgroundMusicMuted;
 
-    // speichere den Zustand
+    // Zustand speichern:
     localStorage.setItem('backgroundMusicMuted', backgroundMusicMuted);
 
     let musicToggleButton = document.getElementById('music-toggle-button');
@@ -103,17 +110,15 @@ function updateSoundStatus() {
     }
 }
 
-
 /**
  * Toggles the mute status of the game audio and updates the UI.
  */
 function toggleSoundAndImage() {
     isGameMuted = !isGameMuted;
-    localStorage.setItem('isGameMuted', isGameMuted); // speichern
+    localStorage.setItem('isGameMuted', isGameMuted); // Zustand speichern
     updateSoundStatus();
     muteSounds();
 }
-
 
 /**
  * Mutes or unmutes all game audio elements based on the game mute status.
@@ -185,7 +190,6 @@ function muteCharacterSounds() {
     }
 }
 
-
 /**
  * Initialisiert den Sound-Status beim Seitenladen anhand von localStorage.
  */
@@ -193,7 +197,7 @@ function initSoundStatusUI() {
     let musicToggleButton = document.getElementById('music-toggle-button');
     let soundIcon = document.getElementById('sound-icon');
 
-    // Falls das HTML-Element noch nicht existiert, abbrechen
+    // Falls die HTML-Elemente noch nicht existieren, abbrechen
     if (!musicToggleButton || !soundIcon) return;
 
     if (backgroundMusicMuted || isGameMuted) {
@@ -205,9 +209,8 @@ function initSoundStatusUI() {
     }
 
     backgroundMusic.muted = backgroundMusicMuted;
-    muteSounds(); // alle Sounds muten oder entmuten
+    muteSounds();
 }
-
 
 window.addEventListener('load', () => {
     initSoundStatusUI();

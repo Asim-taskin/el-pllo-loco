@@ -61,7 +61,7 @@ class World {
     }
 
     resetWorld() {
-        this.availableBottles = 17;
+        this.availableBottles = 27;
         this.throwableObjects = [];
         this.gameOver = false;
         this.camera_x = 0;
