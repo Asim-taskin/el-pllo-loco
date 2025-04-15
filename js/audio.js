@@ -69,9 +69,7 @@ function playBackgroundMusic() {
     backgroundMusic.volume = 0.1;
     backgroundMusic.muted = backgroundMusicMuted;
     backgroundMusic.play().catch((error) => {
-        if (error.name === 'AbortError') {
-            console.log('backgroundMusic.play() aborted, z. B. durch schnelles Pause()');
-        } else {
+        if (error.name !== 'AbortError') {
             console.error(error);
         }
     });
