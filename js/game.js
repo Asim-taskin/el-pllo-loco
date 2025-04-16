@@ -305,3 +305,5 @@ function toggleIngameMenu() {
     const ingameMenu = document.getElementById('ig-menu');
     ingameMenu.style.display = 'flex';
 }
+
+

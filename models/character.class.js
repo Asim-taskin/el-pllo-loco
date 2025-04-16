@@ -161,19 +161,25 @@ class Character extends MoveableObject {
     /**
      * Handles character movement (walking).
      */
-    handleWalking() {
-        if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
-            this.moveRight();
-            this.otherDirection = false;
-            this.walking_sound.play();
-        }
-        if (this.world.keyboard.LEFT && this.x > 0) {
-            this.moveLeft();
-            this.otherDirection = true;
-            this.walking_sound.pause();
-        }
+/**
+ * Handles character movement (walking).
+ */
+handleWalking() {
+    if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
+      this.moveRight();
+      this.otherDirection = false;
+      // Statt direkt .play() aufzurufen, wird safePlay verwendet,
+      // um Race Conditions zu vermeiden.
+      safePlay(this.walking_sound);
     }
-
+    if (this.world.keyboard.LEFT && this.x > 0) {
+      this.moveLeft();
+      this.otherDirection = true;
+      // Hier wird der Sound gestoppt, wenn nach links bewegt wird.
+      this.walking_sound.pause();
+    }
+  }
+  
 
     /**
     * Handles character jumping.
